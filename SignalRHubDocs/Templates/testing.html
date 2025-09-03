@@ -1,0 +1,1965 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>{{Title}}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr-protocol-msgpack@8.0.0/dist/browser/signalr-protocol-msgpack.min.js"></script>
+    <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background: #fafafa;
+          color: #3b4151;
+          font-size: 14px;
+          line-height: 1.4;
+        }
+
+        .swagger-ui {
+          max-width: 1460px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        .streaming-badge {
+          background: #17a2b8;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
+          margin-left: 8px;
+        }
+
+        .streaming-info {
+          background: #e7f3ff;
+          border: 1px solid #b3d9ff;
+          border-radius: 4px;
+          padding: 8px;
+          margin-bottom: 8px;
+          font-size: 12px;
+        }
+
+        .btn-execute[data-streaming="true"] {
+          background: #dc3545;
+          border-color: #dc3545;
+        }
+
+        .btn-execute[data-streaming="true"]:hover {
+          background: #c82333;
+          border-color: #bd2130;
+        }
+
+        .auth-schemes-container {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          min-width: 300px;
+        }
+
+        .auth-scheme {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 4px 0;
+        }
+
+        .auth-scheme-label {
+          min-width: 80px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .return-schema-container {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+          padding: 12px;
+          margin: 10px 0;
+        }
+
+        .auth-scheme-input {
+          flex: 1;
+          padding: 6px 10px;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          font-size: 13px;
+        }
+
+        .info {
+          margin: 20px 0;
+        }
+
+        .info .title {
+          font-size: 36px;
+          font-weight: 600;
+          margin: 0 0 10px 0;
+          color: #3b4151;
+        }
+
+        .info .description {
+          color: #3b4151;
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .info .base-url {
+          font-size: 12px;
+          font-weight: 700;
+          color: #3b4151;
+          margin-bottom: 20px;
+        }
+
+        .schemes {
+          margin-bottom: 20px;
+        }
+
+        .scheme-container {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          margin-bottom: 15px;
+          flex-wrap: wrap;
+        }
+
+        .auth-container {
+          background: #fff;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          padding: 10px;
+          margin-bottom: 20px;
+        }
+
+        .auth-container h4 {
+          margin: 0 0 10px 0;
+          color: #3b4151;
+          font-size: 14px;
+        }
+
+        .auth-input,
+        .protocol-select,
+        .hub-url-input,
+        .combo-input,
+        .live-input {
+          padding: 8px 12px;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          font-size: 14px;
+        }
+
+        .protocol-select {
+          width: 200px;
+        }
+
+        .hub-url-input,
+        .combo-input {
+          width: 300px;
+        }
+
+        .parameter-schema {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+          padding: 8px;
+          margin-top: 8px;
+          font-family: monospace;
+          font-size: 12px;
+          white-space: pre-wrap;
+          color: #495057;
+          text-align: left;
+          width: 100%;
+        }
+
+        .parameter-textarea {
+          width: 100%;
+          min-height: 120px;
+          padding: 8px;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          font-size: 14px;
+          font-family: monospace;
+          resize: vertical;
+        }
+
+        .schema-toggle {
+          background: none;
+          border: none;
+          color: #007bff;
+          cursor: pointer;
+          font-size: 12px;
+          text-decoration: underline;
+          padding: 0;
+          margin-left: 8px;
+        }
+
+        .lock-btn {
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          padding: 8px 10px;
+          cursor: pointer;
+          background: #fff;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 600;
+        }
+
+        .lock-btn.locked {
+          border-color: #2f855a;
+          color: #2f855a;
+        }
+
+        .auth-note {
+          font-size: 12px;
+          color: #737373;
+        }
+
+        .connection-status {
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-weight: 600;
+          margin: 10px 0;
+          text-align: center;
+        }
+
+        .connected {
+          background: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+
+        .disconnected {
+          background: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+
+        .connecting {
+          background: #fff3cd;
+          color: #856404;
+          border: 1px solid #ffeaa7;
+        }
+
+        .btn {
+          padding: 8px 16px;
+          border: 1px solid;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          text-align: center;
+          display: inline-block;
+          text-decoration: none;
+          margin-right: 10px;
+        }
+
+        .btn-primary {
+          background: #4990e2;
+          color: #fff;
+          border-color: #4990e2;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: #1f69c0;
+          border-color: #1f69c0;
+        }
+
+        .btn-danger {
+          background: #f93e3e;
+          color: #fff;
+          border-color: #f93e3e;
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .opblock-tag-section {
+          margin-bottom: 10px;
+        }
+
+        .opblock-tag {
+          display: flex;
+          align-items: center;
+          padding: 10px 20px;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          cursor: pointer;
+          user-select: none;
+          gap: 10px;
+        }
+
+        .opblock-tag:hover {
+          background: rgba(0, 0, 0, 0.02);
+        }
+
+        .opblock-tag h3 {
+          margin: 0;
+          font-size: 18px;
+          flex: 1;
+          color: #3b4151;
+          text-align: left;
+        }
+
+        .opblock-tag small {
+          color: #737373;
+          margin-left: 10px;
+        }
+
+        .opblock-tag .expand-icon {
+          transition: transform 0.2s;
+        }
+
+        .opblock-tag.is-open .expand-icon {
+          transform: rotate(90deg);
+        }
+
+        .opblock-tag-section.is-open .opblock-tag {
+          border-bottom: none;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+
+        .operations-tag {
+          background: #fff;
+          border: 1px solid #d3d3d3;
+          border-top: none;
+          border-bottom-left-radius: 4px;
+          border-bottom-right-radius: 4px;
+          display: none;
+        }
+
+        .opblock-tag-section.is-open .operations-tag {
+          display: block;
+        }
+
+        .opblock {
+          margin-bottom: 0;
+          border-top: 1px solid #d3d3d3;
+        }
+
+        .opblock:first-child {
+          border-top: none;
+        }
+
+        .opblock.opblock-post {
+          background: rgba(73, 204, 144, 0.1);
+          border-left: 4px solid #49cc90;
+        }
+
+        .opblock-summary {
+          display: flex;
+          align-items: center;
+          padding: 5px 20px;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .opblock-summary:hover {
+          background: rgba(0, 0, 0, 0.02);
+        }
+
+        .opblock-summary-method {
+          font-size: 14px;
+          font-weight: 700;
+          min-width: 80px;
+          padding: 6px 15px;
+          text-align: center;
+          border-radius: 3px;
+          background: #49cc90;
+          color: #fff;
+          text-transform: uppercase;
+          font-family: monospace;
+        }
+
+        .opblock-summary-path {
+          font-size: 16px;
+          font-weight: 600;
+          color: #3b4151;
+          text-align: left;
+          margin-left: 15px;
+          font-family: monospace;
+          flex: 1;
+        }
+
+        .opblock-summary-description {
+          color: #737373;
+          margin-left: 15px;
+          font-size: 14px;
+        }
+
+        .opblock-body {
+          padding: 20px;
+          background: #fff;
+          display: none;
+        }
+
+        .opblock.is-open .opblock-body {
+          display: block;
+        }
+
+        .opblock-section {
+          margin-bottom: 20px;
+        }
+
+        .opblock-section-header {
+          margin-bottom: 15px;
+        }
+
+        .opblock-section-header h4 {
+          font-size: 16px;
+          color: #3b4151;
+          margin: 0;
+        }
+
+        .table-container {
+          margin: 10px 0;
+        }
+
+        .parameters table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .parameters th {
+          background: #f7f7f7;
+          padding: 10px;
+          text-align: left;
+          font-weight: 600;
+          color: #3b4151;
+          border-bottom: 1px solid #d3d3d3;
+          font-size: 12px;
+        }
+
+        .parameters td {
+          padding: 10px;
+          border-bottom: 1px solid #ebebeb;
+          vertical-align: top;
+          font-size: 14px;
+          text-align: left;
+        }
+
+        .parameter-name {
+          font-weight: 600;
+          color: #3b4151;
+          font-family: monospace;
+        }
+
+        .parameter-type {
+          color: #8b5a3c;
+          font-family: monospace;
+          font-size: 12px;
+        }
+
+        .parameter-required {
+          color: #f93e3e;
+          font-size: 10px;
+          font-weight: 600;
+          margin-left: 5px;
+        }
+
+        .parameter-input {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          font-size: 14px;
+          font-family: monospace;
+        }
+
+        .execute-wrapper {
+          margin: 20px 0;
+        }
+
+        .btn-execute {
+          background: #4990e2;
+          color: #fff;
+          border: 1px solid #4990e2;
+          padding: 10px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .btn-execute:hover:not(:disabled) {
+          background: #1f69c0;
+        }
+
+        .btn-clear {
+          background: transparent;
+          color: #3b4151;
+          border: 1px solid #d3d3d3;
+          padding: 10px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          border-radius: 4px;
+          cursor: pointer;
+          margin-left: 10px;
+        }
+
+        .responses {
+          margin-top: 20px;
+        }
+
+        .responses-inner {
+          background: #f7f7f7;
+          padding: 10px;
+          border-radius: 4px;
+          border: 1px solid #d3d3d3;
+          display: none;
+        }
+
+        .responses-inner.active {
+          display: block;
+        }
+
+        .response-col_status {
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .response-col_description {
+          margin-bottom: 10px;
+          color: #3b4151;
+          text-align: left;
+        }
+
+        .highlight-code {
+          background: #41444e;
+          color: #fff;
+          padding: 15px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 12px;
+          white-space: pre-wrap;
+          margin: 10px 0;
+          overflow-x: auto;
+          resize: vertical;
+          height: 200px;
+          text-align: left;
+        }
+
+        .curl-command,
+        .request-url {
+          background: #2d3748;
+          color: #e2e8f0;
+          padding: 10px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 12px;
+          margin: 10px 0;
+          white-space: pre-wrap;
+          overflow-x: auto;
+          text-align: left;
+          word-break: break-all;
+        }
+
+        .request-url {
+          color: #90cdf4;
+        }
+
+        .auth-warning {
+          color: #f93e3e;
+          font-size: 12px;
+          margin-top: 5px;
+        }
+
+        .loading {
+          text-align: center;
+          padding: 40px;
+          color: #737373;
+        }
+
+        .error {
+          background: #f8d7da;
+          color: #721c24;
+          padding: 15px;
+          border-radius: 4px;
+          border: 1px solid #f5c6cb;
+          margin: 20px 0;
+        }
+
+        .spinner {
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          border: 3px solid #f3f3f3;
+          border-top: 3px solid #4990e2;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .live-container {
+          display: none;
+          background: #fff;
+          border: 1px solid #d3d3d3;
+          border-radius: 4px;
+          padding: 12px;
+          margin-top: 12px;
+        }
+
+        .live-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+          flex-wrap: wrap;
+        }
+
+        .badge {
+          display: inline-block;
+          font-size: 11px;
+          padding: 2px 8px;
+          border-radius: 999px;
+          background: #edf2f7;
+          color: #2d3748;
+          border: 1px solid #e2e8f0;
+        }
+
+        .live-controls {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .btn-sm {
+          padding: 6px 10px;
+          font-size: 12px;
+          border-radius: 4px;
+          border: 1px solid #d3d3d3;
+          background: #f7f7f7;
+          cursor: pointer;
+        }
+
+        .btn-sm:hover {
+          background: #eee;
+        }
+
+        .listener-list {
+          margin-top: 6px;
+          font-size: 12px;
+          color: #555;
+        }
+
+        .listener-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          margin: 4px 6px 0 0;
+          padding: 2px 8px;
+          border: 1px solid #e2e8f0;
+          background: #f8fafc;
+          border-radius: 999px;
+        }
+
+        .listener-pill button {
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 12px;
+          color: #a00;
+        }
+
+        .live-log {
+          margin-top: 10px;
+          height: 260px;
+          overflow: auto;
+          background: #0b0f19;
+          color: #e2e8f0;
+          border-radius: 4px;
+          padding: 10px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+            "Liberation Mono", "Courier New", monospace;
+          font-size: 12px;
+          white-space: pre-wrap;
+          word-break: break-word;
+          border: 1px solid #1f2937;
+        }
+
+        .live-line {
+          margin: 0 0 6px 0;
+        }
+
+        .live-ts {
+          color: #90cdf4;
+        }
+
+        .live-evt {
+          color: #cbd5e1;
+          font-weight: 700;
+        }
+
+        .live-sys {
+          color: #a3e635;
+        }
+
+        .live-err {
+          color: #fca5a5;
+        }
+
+        .live-hub {
+          color: #22d3ee;
+          font-weight: 700;
+        }
+
+        .live-payload {
+          color: #e2e8f0;
+        }
+
+        .small-note {
+          font-size: 12px;
+          color: #737373;
+        }
+    </style>
+</head>
+<body>
+    <div class="swagger-ui">
+        <div class="info">
+            <h1 class="title">{{Title}}</h1>
+            <div class="description">{{Description}}</div>
+        </div>
+        <!-- Global auth + connection controls -->
+        <div class="auth-container">
+            <h4>Authentication & Connection Configuration</h4>
+            <div class="scheme-container">
+                <!-- Hub combo box -->
+                <select onchange="refreshUIEnabledStatesOnChange(this)" id="hubUrl" class="combo-input"> </select>
+                <select id="protocol" class="protocol-select">
+                    <option value="json">JSON Protocol</option>
+                    <option value="messagepack">MessagePack Protocol</option>
+                </select>
+                <!-- Connect/disconnect the selected hub -->
+                <button id="connectBtn" class="btn btn-primary">Connect</button>
+                <button id="disconnectBtn" class="btn btn-danger" disabled>Disconnect</button>
+            </div>
+            <!-- Swagger-style auth lock -->
+            <div class="scheme-container" style="align-items: flex-start;">
+                <div id="authSchemes" class="auth-schemes-container">
+                    <!-- Dynamic auth schemes will be populated here -->
+                </div>
+                <!--<input type="password" id="accessToken" class="auth-input" placeholder="Bearer token (not stored)" />-->
+                <button id="authLock" class="lock-btn" title="Authorize / Clear"><span aria-hidden="true">🔒</span> Authorize</button>
+                <div class="auth-note">Click the lock to apply/clear the token. If hubs are connected, you'll be prompted to reconnect to apply changes.</div>
+            </div>
+            <div>
+                <h4>Connected Hubs</h4>
+                <div id="connectedHubs" class="listener-list">
+                    <em>No active hubs. Connect above.</em>
+                </div>
+            </div>
+            <div id="connectionStatus" class="connection-status disconnected">
+                <span>Disconnected</span>
+            </div>
+            <!-- Live panel -->
+            <div id="liveContainer" class="live-container">
+                <div class="live-header">
+                    <span class="badge">Live Messages</span>
+                    <div class="live-controls">
+                        <input id="listenerName" class="live-input" placeholder="Server-to-client method (e.g. ReceiveMessage)" />
+                        <select id="listenerHubSelect" class="live-input">
+                            <option value="__all__">All connected hubs</option>
+                        </select>
+                        <button id="addListenerBtn" class="btn-sm">Add listener</button>
+                        <label style="display: inline-flex; align-items: center; gap: 6px;"> <input type="checkbox" id="pauseStreaming" /> Pause </label>
+                        <button id="clearLogBtn" class="btn-sm">Clear</button>
+                    </div>
+                </div>
+                <div id="listenerList" class="listener-list"></div>
+                <div id="liveLog" class="live-log" aria-live="polite" aria-label="Websocket live log"></div>
+                <div class="small-note">Log shows messages across all connected hubs. Each line is prefixed with the hub route.</div>
+            </div>
+        </div>
+        <div id="content" class="loading">
+            <div class="spinner"></div>
+            Loading hub documentation...
+        </div>
+    </div>
+    <script>
+         let hubDocumentation = null;
+         let authConfig = {};
+         const hubConnections = new Map();
+         const listenersByHub = new Map();
+         const MAX_LOG_LINES = 500;
+         let paused = false;
+         let currentToken = null;
+         let authLocked = false;
+
+         document.addEventListener("DOMContentLoaded", function () {
+             loadHubDocumentation();
+             setupEventHandlers();
+             refreshUIEnabledStates();
+         });
+
+         function renderAuthSchemes(documentation) {
+             const container = document.getElementById('authSchemes');
+             const schemes = documentation.supportedAuthSchemes || [
+                 { name: 'Bearer', type: 'Bearer', description: 'JWT Bearer token', isDefault: true }
+             ];
+
+             container.innerHTML = schemes.map(scheme => `
+         <div class="auth-scheme">
+             <label class="auth-scheme-label">${escapeHtml(scheme.name)}:</label>
+             <input
+                 type="${scheme.type === 'Bearer' ? 'password' : 'text'}"
+                 class="auth-scheme-input"
+                 id="auth-${scheme.name.toLowerCase()}"
+                 placeholder="${getAuthPlaceholder(scheme)}"
+                 title="${escapeHtml(scheme.description)}"
+             />
+         </div>
+         `).join('');
+         }
+
+         function getAuthPlaceholder(scheme) {
+             switch (scheme.type) {
+                 case 'Bearer': return 'JWT token (without "Bearer" prefix)';
+                 case 'ApiKey': return 'API key value';
+                 case 'QueryParam': return `Value for ${scheme.queryParamName} parameter`;
+                 case 'Cookie': return `${scheme.cookieName} cookie value`;
+                 case 'CustomHeader': return `${scheme.headerName} header value`;
+                 default: return 'Authentication value';
+             }
+         }
+
+         function collectAuthConfig() {
+             const config = {};
+             document.querySelectorAll('.auth-scheme-input').forEach(input => {
+                 const schemeName = input.id.replace('auth-', '');
+                 const value = input.value.trim();
+                 if (value) {
+                     config[schemeName] = value;
+                 }
+             });
+             return config;
+         }
+
+
+         function setupEventHandlers() {
+
+             document.getElementById("connectBtn").onclick = () => {
+                 const hubUrl = getHubUrlInput();
+                 const protocol = getProtocol();
+                 connectToHub(hubUrl, protocol);
+             };
+             document.getElementById("disconnectBtn").onclick = () => {
+                 const hubUrl = getHubUrlInput();
+                 disconnectFromHub(hubUrl);
+             };
+
+             document.getElementById("authLock").onclick = async () => {
+                 const willLock = !authLocked;
+
+                 if (willLock) {
+                     authConfig = collectAuthConfig();
+                     const tokenField = document.getElementById("accessToken");
+                     const legacyToken = tokenField?.value.trim();
+                     if (legacyToken) {
+                         authConfig.bearer = legacyToken;
+                     }
+
+                     authLocked = true;
+                     toggleAuthLockUI(true);
+                     liveLogLine("system", "Auth configuration applied");
+                 } else {
+                     authConfig = {};
+                     authLocked = false;
+                     toggleAuthLockUI(false);
+                     liveLogLine("system", "Auth configuration cleared");
+                 }
+
+                 if (hubConnections.size > 0) {
+                     const reconfirm = confirm("Authentication changed. Reconnect all active hubs to apply?");
+                     if (reconfirm) {
+                         const toRestart = [...hubConnections.keys()];
+                         for (const url of toRestart) {
+                             try { await disconnectFromHub(url); } catch { }
+                         }
+                         for (const url of toRestart) {
+                             await connectToHub(url, getProtocol());
+                         }
+                     }
+                 }
+             };
+
+             const addBtn = document.getElementById("addListenerBtn");
+             const clearBtn = document.getElementById("clearLogBtn");
+             const pauseCb = document.getElementById("pauseStreaming");
+
+             addBtn.onclick = () => {
+                 const name = (document.getElementById("listenerName").value || "").trim();
+                 const targetHub = document.getElementById("listenerHubSelect").value;
+                 if (!name) return;
+                 addLiveListener(targetHub, name);
+                 document.getElementById("listenerName").value = "";
+             };
+             clearBtn.onclick = clearLiveLog;
+             pauseCb.onchange = (e) => {
+                 paused = e.target.checked;
+             };
+         }
+
+         function toggleAuthLockUI(locked) {
+             const lockBtn = document.getElementById("authLock");
+             lockBtn.classList.toggle("locked", locked);
+             lockBtn.innerHTML = locked ? "🔓 Clear" : "🔒 Authorize";
+         }
+
+         function getProtocol() {
+             return document.getElementById("protocol").value;
+         }
+
+         function getHubUrlInput() {
+             return document.getElementById("hubUrl").value.trim();
+         }
+
+         function setHubUrlInput(url) {
+             document.getElementById("hubUrl").value = url || "";
+         }
+
+         function refreshUIEnabledStatesOnChange(changeEvent) {
+             refreshUIEnabledStates(changeEvent.value);
+         }
+
+         function refreshUIEnabledStates(selectedHubUrl = null) {
+             const statusElement = document.getElementById("connectionStatus");
+             const connectBtn = document.getElementById("connectBtn");
+             const disconnectBtn = document.getElementById("disconnectBtn");
+
+             const hubUrl = selectedHubUrl || getHubUrlInput();
+             const { conn } = hubConnections.has(hubUrl) ? hubConnections.get(hubUrl) : { conn: null };
+
+             if (!hubUrl) {
+                 statusElement.className = "connection-status disconnected";
+                 statusElement.innerHTML = "<span>Disconnected</span>";
+                 connectBtn.disabled = false;
+                 disconnectBtn.disabled = true;
+                 return;
+             }
+
+             if (!conn) {
+                 statusElement.className = "connection-status disconnected";
+                 statusElement.innerHTML = `<span>[${escapeHtml(hubUrl)}] Disconnected</span>`;
+                 connectBtn.disabled = false;
+                 disconnectBtn.disabled = true;
+             } else {
+                 const state = conn.state;
+                 if (state === signalR.HubConnectionState.Connected) {
+                     statusElement.className = "connection-status connected";
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubUrl)}] Connected</span>`;
+                     connectBtn.disabled = true;
+                     disconnectBtn.disabled = false;
+                 } else if (state === signalR.HubConnectionState.Connecting || state === signalR.HubConnectionState.Reconnecting) {
+                     statusElement.className = "connection-status connecting";
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubUrl)}] Connecting...</span>`;
+                     connectBtn.disabled = true;
+                     disconnectBtn.disabled = true;
+                 } else {
+                     statusElement.className = "connection-status disconnected";
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubUrl)}] Disconnected</span>`;
+                     connectBtn.disabled = false;
+                     disconnectBtn.disabled = !conn;
+                 }
+             }
+
+             toggleLivePanel(hubConnections.size > 0);
+             rebuildListenerHubSelect();
+         }
+
+         async function loadHubDocumentation() {
+             try {
+                 const response = await fetch("{{ApiJsonUrl}}");
+                 if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                 hubDocumentation = await response.json();
+                 renderSwaggerUI(hubDocumentation);
+                 populateHubDatalist(hubDocumentation);
+                 renderAuthSchemes(hubDocumentation);
+             } catch (error) {
+                 showError("Failed to load hub documentation: " + error.message);
+             }
+         }
+
+         function populateHubDatalist(doc) {
+             const select = document.getElementById("hubUrl");
+             select.innerHTML = "";
+             if (!doc?.hubs?.length) return;
+
+             doc.hubs.forEach((hub) => {
+                 const opt = document.createElement("option");
+                 opt.value = hub.route;
+                 opt.textContent = hub.route;
+                 select.appendChild(opt);
+             });
+         }
+
+         function renderConnectedHubs() {
+         const container = document.getElementById("connectedHubs");
+         if (!hubConnections.size) {
+             container.innerHTML = "<em>No active hubs. Connect above.</em>";
+             return;
+         }
+
+         container.innerHTML = [...hubConnections.entries()]
+             .map(([url, { authConfig }]) => `
+         <span class="listener-pill">
+             <strong>${escapeHtml(url)}</strong>
+             <button onclick="toggleHubAuth('${escapeJs(url)}')" title="View auth info">
+                 ${Object.keys(authConfig || {}).length > 0 ? '🔐' : '🔓'}
+             </button>
+             <button onclick="disconnectFromHub('${escapeJs(url)}')" title="Disconnect">✕</button>
+         </span>
+         `)
+             .join("");
+         }
+
+         async function toggleHubAuth(hubUrl) {
+             const entry = hubConnections.get(hubUrl);
+             if (!entry) return;
+
+             const authInfo = entry.authConfig || {};
+             const authSummary = Object.keys(authInfo).length > 0
+                 ? `Active auth methods:\n${Object.keys(authInfo).map(k => `• ${k}`).join('\n')}`
+                 : 'No authentication configured';
+
+             alert(`Hub: ${hubUrl}\n\n${authSummary}\n\nTo change authentication, use the global auth settings above and reconnect.`);
+         }
+
+         async function connectToHub(hubUrl, protocol, tokenOverride = null) {
+             if (!hubUrl) {
+                 updateConnectionStatus("error", "Please enter a hub URL");
+                 return;
+             }
+             if (hubConnections.has(hubUrl)) {
+                 liveLogLine("system", `[${hubUrl}] Already connected`);
+                 refreshUIEnabledStates(hubUrl);
+                 return hubConnections.get(hubUrl);
+             }
+
+             updateConnectionStatus("connecting", null, hubUrl);
+
+             let auth = {};
+             if (tokenOverride) {
+                 auth.bearer = tokenOverride;
+             } else {
+                 auth = { ...authConfig };
+                 const tokenField = document.getElementById("accessToken");
+                 const legacyToken = tokenField?.value.trim();
+                 if (legacyToken && !auth.bearer) {
+                     auth.bearer = legacyToken;
+                 }
+             }
+
+             try {
+                 const finalHubUrl = buildUrlWithQueryAuth(hubUrl, auth);
+                 const headers = buildAuthHeaders(auth);
+                 const connectionBuilder = new signalR.HubConnectionBuilder()
+                     .withUrl(finalHubUrl, {
+                         accessTokenFactory: () => auth.bearer || null,
+                         headers: headers
+                     })
+                     .withAutomaticReconnect()
+                     .configureLogging(signalR.LogLevel.Information);
+
+                 if (protocol === "messagepack") {
+                     connectionBuilder.withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol());
+                 }
+
+                 const connection = connectionBuilder.build();
+                 hookTransportRaw(connection, hubUrl);
+
+                 connection.onclose((error) => {
+                     hubConnections.delete(hubUrl);
+                     updateConnectionStatus("disconnected", error?.message || null, hubUrl);
+                     liveLogLine(error ? "error" : "system", "Connection closed", error?.message || null, hubUrl);
+                     toggleLivePanel(hubConnections.size > 0);
+                     clearListenersForHub(hubUrl, false);
+                     rebuildListenerHubSelect();
+                     renderConnectedHubs();
+                 });
+
+                 connection.onreconnecting((err) => {
+                     updateConnectionStatus("connecting", null, hubUrl);
+                     liveLogLine("system", "Reconnecting...", err?.message || null, hubUrl);
+                 });
+
+                 connection.onreconnected((cid) => {
+                     updateConnectionStatus("connected", null, hubUrl);
+                     liveLogLine("system", "Reconnected", cid || null, hubUrl);
+                 });
+
+                 await connection.start();
+                 const displayToken = auth.bearer || Object.values(auth).find(v => v) || null;
+                 hubConnections.set(hubUrl, {
+                     conn: connection,
+                     token: displayToken,
+                     authConfig: { ...auth }
+                 });
+
+                 updateConnectionStatus("connected", null, hubUrl);
+                 liveLogLine("system", "Connected", `Auth: ${Object.keys(auth).join(', ') || 'none'}`, hubUrl);
+                 toggleLivePanel(true);
+                 rebuildListenerHubSelect();
+                 renderConnectedHubs();
+                 return connection;
+
+             } catch (err) {
+                 updateConnectionStatus("disconnected", err.toString(), hubUrl);
+                 liveLogLine("error", "Failed to connect", err?.message || String(err), hubUrl);
+                 return null;
+             } finally {
+                 refreshUIEnabledStates(hubUrl);
+             }
+         }
+
+         function buildAuthHeaders(auth) {
+             const headers = {};
+             if (auth.apikey) {
+                 headers['X-API-Key'] = auth.apikey;
+             }
+             Object.entries(auth).forEach(([key, value]) => {
+                 if (key !== 'bearer' && value) {
+                     const scheme = getSchemeByName(key);
+                     console.log(`Processing auth key: ${key}, scheme:`, scheme);
+                     if (scheme?.type === 'CustomHeader' && scheme.headerName) {
+                         headers[scheme.headerName] = value;
+                         console.log(`Added custom header: ${scheme.headerName}`);
+                     }
+                 }
+             });
+
+             return headers;
+         }
+
+
+         function buildUrlWithQueryAuth(hubUrl, auth) {
+             try {
+                 const url = hubUrl.startsWith('http') ? new URL(hubUrl) : new URL(hubUrl, window.location.origin);
+                 Object.entries(auth).forEach(([key, value]) => {
+                     if (value) {
+                         const scheme = getSchemeByName(key);
+                         if (scheme?.type === 'QueryParam' && scheme.queryParamName) {
+                             url.searchParams.set(scheme.queryParamName, value);
+                         }
+                     }
+                 });
+                 return url.toString();
+             } catch (e) {
+                 console.warn('URL parsing failed, using original hubUrl:', e);
+                 return hubUrl;
+             }
+         }
+
+
+         function getSchemeByName(name) {
+             if (!hubDocumentation?.supportedAuthSchemes) return null;
+             return hubDocumentation.supportedAuthSchemes.find(scheme =>
+                 scheme.name.toLowerCase() === name.toLowerCase()
+             );
+         }
+
+
+         async function disconnectFromHub(hubUrl) {
+             const { conn } = hubConnections.get(hubUrl);
+             if (!conn) {
+                 updateConnectionStatus("disconnected", "Not connected", hubUrl);
+                 return;
+             }
+             try {
+                 await conn.stop();
+             } catch {}
+             hubConnections.delete(hubUrl);
+             updateConnectionStatus("disconnected", null, hubUrl);
+             liveLogLine("system", "Disconnected", null, hubUrl);
+             renderConnectedHubs();
+             toggleLivePanel(hubConnections.size > 0);
+             clearListenersForHub(hubUrl,  false);
+             rebuildListenerHubSelect();
+             refreshUIEnabledStates(hubUrl);
+         }
+
+         function updateConnectionStatus(status, message, hubUrlForLabel) {
+             const statusElement = document.getElementById("connectionStatus");
+             const connectBtn = document.getElementById("connectBtn");
+             const disconnectBtn = document.getElementById("disconnectBtn");
+
+             const hubLabel = hubUrlForLabel || getHubUrlInput() || "(none)";
+             switch (status) {
+                 case "connected":
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubLabel)}] Connected</span>`;
+                     statusElement.className = "connection-status connected";
+                     connectBtn.disabled = true;
+                     disconnectBtn.disabled = false;
+                     break;
+                 case "connecting":
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubLabel)}] Connecting...</span>`;
+                     statusElement.className = "connection-status connecting";
+                     connectBtn.disabled = true;
+                     disconnectBtn.disabled = true;
+                     break;
+                 case "error":
+                     statusElement.innerHTML = `<span>Error${message ? ": " + escapeHtml(message) : ""}</span>`;
+                     statusElement.className = "connection-status disconnected";
+                     connectBtn.disabled = false;
+                     disconnectBtn.disabled = true;
+                     break;
+                 default:
+                     statusElement.innerHTML = `<span>[${escapeHtml(hubLabel)}] Disconnected${message ? ": " + escapeHtml(message) : ""}</span>`;
+                     statusElement.className = "connection-status disconnected";
+                     connectBtn.disabled = false;
+                     disconnectBtn.disabled = true;
+                     break;
+             }
+         }
+
+         function toggleLivePanel(show) {
+             const live = document.getElementById("liveContainer");
+             if (live) live.style.display = show ? "block" : "none";
+         }
+
+         function liveLogLine(kind, evt, payload = null, hubUrl = null) {
+             if (paused) return;
+             const log = document.getElementById("liveLog");
+             if (!log) return;
+             const ts = new Date().toISOString();
+             const line = document.createElement("div");
+             line.className = "live-line";
+             const evtClass = kind === "error" ? "live-err" : kind === "system" ? "live-sys" : "live-evt";
+             const payloadStr = payload == null ? "" : "\n  " + safeStringify(payload, 2);
+             const hubPrefix = hubUrl ? `<span class="live-hub">[${escapeHtml(hubUrl)}]</span> ` : "";
+             line.innerHTML = `<span class="live-ts">[${ts}]</span> ${hubPrefix}<span class="${evtClass}">${escapeHtml(String(evt))}</span>${payloadStr ? ' <span class="live-payload">' + escapeHtml(payloadStr) + "</span>" : ""}`;
+             log.appendChild(line);
+             while (log.childNodes.length > MAX_LOG_LINES) log.removeChild(log.firstChild);
+             log.scrollTop = log.scrollHeight;
+         }
+
+         function clearLiveLog() {
+             const log = document.getElementById("liveLog");
+             if (log) log.innerHTML = "";
+         }
+
+         function rebuildListenerHubSelect() {
+             const sel = document.getElementById("listenerHubSelect");
+             const snapshot = new Set([...hubConnections.keys()]);
+             const current = sel.value;
+             sel.innerHTML = '<option value="__all__">All connected hubs</option>' + [...snapshot].map((u) => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join("");
+             if (snapshot.has(current) || current === "__all__") sel.value = current;
+         }
+
+         function addLiveListener(targetHub, methodName) {
+             const addToHub = (hubUrl) => {
+                 const { conn } = hubConnections.get(hubUrl);
+                 if (!conn || conn.state !== signalR.HubConnectionState.Connected) {
+                     liveLogLine("error", `Cannot add listener '${methodName}' while disconnected`, null, hubUrl);
+                     return;
+                 }
+                 const map = listenersByHub.get(hubUrl) || new Map();
+                 if (map.has(methodName)) {
+                     liveLogLine("system", `Listener '${methodName}' already exists`, null, hubUrl);
+                     return;
+                 }
+                 const handler = (...args) => {
+                     liveLogLine("event", methodName, args, hubUrl);
+                 };
+                 try {
+                     conn.on(methodName, handler);
+                 } catch {}
+                 map.set(methodName, handler);
+                 listenersByHub.set(hubUrl, map);
+                 liveLogLine("system", `Subscribed to '${methodName}'`, null, hubUrl);
+             };
+
+             if (targetHub === "__all__") {
+                 if (hubConnections.size === 0) {
+                     liveLogLine("error", `No connected hubs to attach '${methodName}'`);
+                 } else {
+                     hubConnections.forEach((_, url) => addToHub(url));
+                 }
+             } else {
+                 addToHub(targetHub);
+             }
+
+             renderListenerPills();
+         }
+
+         function removeLiveListener(hubUrl, methodName) {
+             const map = listenersByHub.get(hubUrl);
+             if (!map) return;
+             const handler = map.get(methodName);
+             if (!handler) return;
+             try {
+                 const { conn } = hubConnections.get(hubUrl);
+                 if (conn) conn.off(methodName, handler);
+             } catch {}
+             map.delete(methodName);
+             if (map.size === 0) listenersByHub.delete(hubUrl);
+             liveLogLine("system", `Unsubscribed from '${methodName}'`, null, hubUrl);
+             renderListenerPills();
+         }
+
+         function clearListenersForHub(hubUrl, alsoDetach = true) {
+             const map = listenersByHub.get(hubUrl);
+             if (!map) return;
+             if (alsoDetach) {
+                 const { conn } = hubConnections.get(hubUrl);
+                 if (conn) {
+                     map.forEach((handler, methodName) => {
+                         try {
+                             conn.off(methodName, handler);
+                         } catch {}
+                     });
+                 }
+             }
+             listenersByHub.delete(hubUrl);
+             renderListenerPills();
+         }
+
+         function renderListenerPills() {
+             const list = document.getElementById("listenerList");
+             if (!list) return;
+
+             const chips = [];
+             listenersByHub.forEach((map, hubUrl) => {
+                 map.forEach((_, method) => {
+                     chips.push(`
+                      <span class="listener-pill">
+                          <strong>${escapeHtml(hubUrl)}</strong>: ${escapeHtml(method)}
+                          <button title="Remove" onclick="removeLiveListener('${escapeJs(hubUrl)}','${escapeJs(method)}')">✕</button>
+                      </span>
+                  `);
+                 });
+             });
+
+             list.innerHTML = chips.length ? chips.join("") : "<em>No active listeners. Add one above.</em>";
+         }
+
+         function hookTransportRaw(conn, hubUrl) {
+
+             const httpConn = conn?.connection;
+             const transport = httpConn?.transport;
+             if (!httpConn || !transport) return;
+
+             const origOnReceive = transport.onreceive?.bind(transport);
+             transport.onreceive = (data) => {
+                 try {
+                     if (typeof data === "string") {
+                         const frames = data.split("\u001e").filter((f) => f);
+                         frames.forEach((frame) => {
+                             try {
+                                 const msg = JSON.parse(frame);
+
+                                 liveLogLine("event", `in:${msg.type === 1 ? msg.target : "msg"}`, msg, hubUrl);
+                             } catch {
+                                 liveLogLine("event", "in:raw", frame, hubUrl);
+                             }
+                         });
+                     } else {
+                         liveLogLine("event", "in:binary", data.byteLength + " bytes", hubUrl);
+                     }
+                 } catch (err) {
+                     liveLogLine("error", "transport-receive", err.message, hubUrl);
+                 }
+                 if (origOnReceive) origOnReceive(data);
+             };
+         }
+
+         function renderSwaggerUI(doc) {
+             const content = document.getElementById("content");
+
+             if (!doc.hubs || doc.hubs.length === 0) {
+                 content.innerHTML = '<div class="error">No documented hubs found.</div>';
+                 return;
+             }
+
+             content.innerHTML = doc.hubs
+                 .map(
+                     (hub, hubIndex) => `
+              <div class="opblock-tag-section" id="operations-tag-${hubIndex}">
+                  <div class="opblock-tag" onclick="toggleTag(${hubIndex})">
+                      <h3>${escapeHtml(hub.name)}</h3>
+                      <small>${escapeHtml(hub.description)} - ${escapeHtml(hub.route)}</small>
+                      <div class="expand-icon">▶</div>
+                  </div>
+                  <div class="operations-tag">
+
+                      ${hub.methods
+                          .map(
+                              (method, methodIndex) => `
+                          <div class="opblock opblock-post" id="operations-${hubIndex}-${methodIndex}">
+                              <div class="opblock-summary" onclick="toggleMethod(${hubIndex}, ${methodIndex})">
+                                  <div class="opblock-summary-method">HUB</div>
+                                  <div class="opblock-summary-path">${escapeHtml(method.name)}</div>
+                                  <div class="opblock-summary-description">${escapeHtml(method.summary)}</div>
+                              </div>
+                              <div class="opblock-body">
+                                  <div class="opblock-description-wrapper">
+                                      <div class="opblock-description">
+                                          <p>${escapeHtml(method.description)}</p>
+                                          ${method.requiresAuth ? '<div class="auth-warning">Authentication required</div>' : ""}
+                                          <div class="small-note">Route: <strong>${escapeHtml(hub.route)}</strong></div>
+                                      </div>
+                                  </div>
+
+                                  ${
+                                      method.parameters.length > 0
+                                          ? `
+                                      <div class="opblock-section">
+                                          <div class="opblock-section-header">
+                                              <h4>Parameters</h4>
+                                          </div>
+                                          <div class="table-container">
+                                              <div class="parameters">
+                                                  <table>
+                                                      <thead>
+                                                          <tr>
+                                                              <th class="col_header parameters-col_name">Name</th>
+                                                              <th class="col_header parameters-col_description">Description</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                         ${method.parameters
+                                                             .map(
+                                                                 (param, paramIndex) => `
+                                                         <tr>
+                                                             <td class="parameters-col_name">
+                                                                 <div class="parameter-name">
+                                                                     ${escapeHtml(param.name)}
+                                                                     ${param.isOptional ? "" : '<span class="parameter-required">*</span>'}
+                                                                 </div>
+                                                                 <div class="parameter-type">${escapeHtml(param.type)}</div>
+                                                             </td>
+                                                             <td class="parameters-col_description">
+                                                     ${
+                                                         param.schema && param.schema.enum
+                                                             ? `
+                                                         <select
+                                                             class="parameter-input"
+                                                             id="param-${hubIndex}-${methodIndex}-${paramIndex}">
+                                                             <option value="">Select ${escapeHtml(param.type)}</option>
+                                                             ${param.schema.enum.map((enumValue) => `<option value="${escapeHtml(enumValue)}">${escapeHtml(enumValue)}</option>`).join("")}
+                                                         </select>
+                                                     `
+                                                             : isComplexType(param.type, param.schema)
+                                                             ? `
+                                                         <textarea
+                                                             class="parameter-textarea"
+                                                             id="param-${hubIndex}-${methodIndex}-${paramIndex}"
+                                                             placeholder="${escapeHtml(generateTextareaPlaceholder(param))}">${getDefaultTextareaContent(param)}</textarea>
+                                                     `
+                                                             : `
+                                                         <input type="text"
+                                                                class="parameter-input"
+                                                                id="param-${hubIndex}-${methodIndex}-${paramIndex}"
+                                                                placeholder="Enter ${escapeHtml(param.type)} value">
+                                                     `
+                                                     }
+                                                                 <div style="font-size: 12px; color: #737373; margin-top: 4px;">
+                                                                     ${escapeHtml(param.description)}
+                                                                     ${
+                                                                         param.schema
+                                                                             ? `
+                                                                         <button type="button" class="schema-toggle" onclick="toggleSchema(${hubIndex}, ${methodIndex}, ${paramIndex})">
+                                                                             Show schema
+                                                                         </button>
+                                                                         <div class="parameter-schema" id="schema-${hubIndex}-${methodIndex}-${paramIndex}" style="display: none;">${escapeHtml(JSON.stringify(param.schema, null, 2))}
+                                                                         </div>` : ""
+                                                                     }
+                                                                 </div>
+                                                             </td>
+                                                         </tr>
+                                                     `
+                                                             )
+                                                             .join("")}
+                                                      </tbody>
+                                                  </table>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  `
+                                          : ""
+                                  }
+
+                                 ${
+                                                                      method.returnSchema && method.returnType !== 'void'
+                                                                          ? `
+                                     <div class="opblock-section">
+                                         <div class="opblock-section-header">
+                                             <h4>Return Type: ${escapeHtml(method.returnType)}
+                                                 ${method.returnSchema.type === 'stream' ? '<span class="streaming-badge">STREAMING</span>' : ''}
+                                             </h4>
+                                         </div>
+                                         <div class="table-container">
+                                             <div class="return-schema-container">
+                                                 ${method.returnSchema.type === 'stream' ? `
+                                                     <div class="streaming-info">
+                                                         <strong>Streaming Method:</strong> Returns multiple values over time<br>
+                                                         <strong>Item Type:</strong> ${method.returnSchema.itemSchema ? JSON.stringify(method.returnSchema.itemSchema.type) : 'Unknown'}
+                                                     </div>
+                                                 ` : ''}
+                                                 <button type="button" class="schema-toggle" onclick="toggleReturnSchema(${hubIndex}, ${methodIndex})">
+                                                     Show return schema
+                                                 </button>
+                                                 <div class="parameter-schema" id="return-schema-${hubIndex}-${methodIndex}" style="display: none;">${escapeHtml(JSON.stringify(method.returnSchema, null, 2))}
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                     `
+                                                                          : method.returnType !== 'void'
+                                                                              ? `
+                                     <div class="opblock-section">
+                                         <div class="opblock-section-header">
+                                             <h4>Return Type: ${escapeHtml(method.returnType)}</h4>
+                                         </div>
+                                     </div>
+                                     `
+                                                                              : ""
+                                 }
+
+                                  <div class="execute-wrapper">
+                                      <button class="btn-execute"
+                                              data-hub="${hubIndex}"
+                                              data-method="${methodIndex}"
+                                              data-name="${escapeHtml(method.name)}"
+                                              onclick="executeMethodSimple(${hubIndex}, ${methodIndex}, '${escapeHtml(method.name)}')">Execute</button>
+                                      <button class="btn-clear" onclick="clearMethodResponse(${hubIndex}, ${methodIndex})">Clear</button>
+                                  </div>
+
+                                  <div class="responses">
+                                      <div class="responses-inner" id="responses-${hubIndex}-${methodIndex}">
+                                          <div class="response-col_status">Code</div>
+                                          <div class="response-col_description">Details</div>
+                                          <div class="curl-command" id="curl-${hubIndex}-${methodIndex}" style="display: none;"></div>
+                                          <div class="request-url" id="request-url-${hubIndex}-${methodIndex}" style="display: none;"></div>
+                                          <div class="highlight-code" id="response-${hubIndex}-${methodIndex}" style="display: none;"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      `
+                          )
+                          .join("")}
+                  </div>
+              </div>
+          `
+                 )
+                 .join("");
+         }
+
+         function isComplexType(type, schema) {
+             if (schema && schema.enum) {
+                 return false;
+             }
+
+             const simpleTypes = ["string", "int", "long", "float", "double", "decimal", "bool", "boolean", "DateTime", "Guid"];
+             const lowerType = type.toLowerCase();
+
+             if (simpleTypes.some((simple) => lowerType.includes(simple.toLowerCase()))) {
+                 return false;
+             }
+
+             return true;
+         }
+
+         function toggleSchema(hubIndex, methodIndex, paramIndex) {
+             const schemaDiv = document.getElementById(`schema-${hubIndex}-${methodIndex}-${paramIndex}`);
+             const button = event.target;
+
+             if (!schemaDiv) return;
+
+             if (schemaDiv.style.display === "none") {
+                 schemaDiv.style.display = "block";
+                 button.textContent = "Hide schema";
+             } else {
+                 schemaDiv.style.display = "none";
+                 button.textContent = "Show schema";
+             }
+         }
+
+         function generateTextareaPlaceholder(param) {
+             if (param.schema) {
+                 const example = generateExampleFromSchema(param.schema);
+                 if (example !== null) {
+                     return `Enter JSON object for ${param.type}`;
+                 }
+             }
+             return `Enter JSON object for ${param.type}`;
+         }
+
+         function getDefaultTextareaContent(param) {
+             if (param.schema) {
+                 const example = generateExampleFromSchema(param.schema);
+                 if (example !== null) {
+                     return JSON.stringify(example, null, 2);
+                 }
+             }
+             return "";
+         }
+
+         function toggleTag(tagIndex) {
+             const tag = document.getElementById(`operations-tag-${tagIndex}`);
+             tag.classList.toggle("is-open");
+         }
+
+         function toggleMethod(hubIndex, methodIndex) {
+             const method = document.getElementById(`operations-${hubIndex}-${methodIndex}`);
+             method.classList.toggle("is-open");
+         }
+
+         async function executeMethodSimple(hubIndex, methodIndex, methodName) {
+
+             if (!hubDocumentation || !hubDocumentation.hubs || !hubDocumentation.hubs[hubIndex]) {
+                 showMethodError(hubIndex, methodIndex, "Method documentation not found");
+                 return;
+             }
+             const hub = hubDocumentation.hubs[hubIndex];
+             const hubUrl = hub.route;
+             const protocol = getProtocol();
+
+             let { conn } = hubConnections.has(hubUrl) ? hubConnections.get(hubUrl) : { conn: null };
+             if (!conn || conn.state !== signalR.HubConnectionState.Connected) {
+                 conn = await connectToHub(hubUrl, protocol);
+                 if (!conn || conn.state !== signalR.HubConnectionState.Connected) {
+                     showMethodError(hubIndex, methodIndex, `Failed to connect to ${hubUrl}`);
+                     return;
+                 }
+             }
+
+             const method = hub.methods[methodIndex];
+             if (!method) {
+                 showMethodError(hubIndex, methodIndex, "Method not found in documentation");
+                 return;
+             }
+
+             const parameters = method.parameters || [];
+             const isStreaming = method.returnSchema?.type === 'stream' ||
+                 method.returnType.includes('IAsyncEnumerable') ||
+                 method.returnType.includes('ChannelReader');
+             const requestUrl = document.getElementById(`request-url-${hubIndex}-${methodIndex}`);
+             const curlCmd = document.getElementById(`curl-${hubIndex}-${methodIndex}`);
+             const responseDiv = document.getElementById(`response-${hubIndex}-${methodIndex}`);
+             const responsesContainer = document.getElementById(`responses-${hubIndex}-${methodIndex}`);
+
+             if (!requestUrl || !curlCmd || !responseDiv || !responsesContainer) {
+                 console.error("Missing response elements for:", { hubIndex, methodIndex });
+                 showMethodError(hubIndex, methodIndex, "Response elements not found");
+                 return;
+             }
+
+             const executeButton = document.querySelector(`[data-hub="${hubIndex}"][data-method="${methodIndex}"]`);
+             if (executeButton?.dataset.streaming === "true") {
+                 return;
+             }
+
+             if (executeButton && !executeButton.originalOnClick) {
+                 executeButton.originalOnClick = executeButton.onclick;
+             }
+
+             try {
+                 const args = [];
+
+                 parameters.forEach((param, paramIndex) => {
+                     const input = document.getElementById(`param-${hubIndex}-${methodIndex}-${paramIndex}`);
+                     if (!input) return;
+
+                     let value = input.value.trim();
+                     if (value) {
+                         try {
+
+                             if (param.schema && param.schema.enum) {
+                                 if (param.sendEnumAsString) {
+
+                                     args.push(value);
+                                 } else {
+
+                                     const enumIndex = param.schema.enumValues ? param.schema.enumValues.find((e) => e.name === value)?.value : param.schema.enum.indexOf(value);
+                                     args.push(enumIndex !== undefined ? enumIndex : 0);
+                                 }
+                             } else if (isComplexType(param.type)) {
+                                 value = JSON.parse(value);
+                                 args.push(value);
+                             } else {
+                                 try {
+                                     value = JSON.parse(value);
+                                 } catch {
+
+                                 }
+                                 args.push(param.type.toLowerCase() === "string" ? value?.toString() : value);
+                             }
+                         } catch (e) {
+                             throw new Error(`Parameter '${param.name}' has invalid JSON format`);
+                         }
+                     } else if (!param.isOptional) {
+                         throw new Error(`Parameter '${param.name}' is required`);
+                     }
+                 });
+
+                 requestUrl.textContent = `SignalR Hub (${hubUrl}) Method: ${methodName}`;
+                 requestUrl.style.display = "block";
+
+                 curlCmd.textContent = isStreaming ?
+                     `// SignalR Streaming Invocation\nconst stream = connection.stream('${methodName}'${args.length > 0 ? ', ' + args.map(arg => JSON.stringify(arg)).join(', ') : ''});\nstream.subscribe({\n  next: (item) => console.log('Received:', item),\n  complete: () => console.log('Stream completed'),\n  error: (err) => console.error('Stream error:', err)\n});` :
+                     `// SignalR Hub Invocation\nawait connection.invoke('${methodName}'${args.length > 0 ? ', ' + args.map(arg => JSON.stringify(arg)).join(', ') : ''});`;
+
+                 curlCmd.style.display = "block";
+
+                 responsesContainer.classList.add("active");
+
+                 if (executeButton) {
+                     executeButton.disabled = true;
+                     executeButton.textContent = isStreaming ? "Starting Stream..." : "Executing...";
+                 }
+
+                 const startTime = Date.now();
+
+                 if (isStreaming) {
+                     if (executeButton) {
+                         executeButton.disabled = false;
+                     }
+                     await executeStreamingMethod(conn, methodName, args, responseDiv, hubUrl, executeButton);
+                 } else {
+                     const result = await conn.invoke(methodName, ...args);
+                     const endTime = Date.now();
+                     const duration = endTime - startTime;
+                     liveLogLine("event", `invoke:${methodName}`, { args, result, duration: duration }, hubUrl);
+                     responseDiv.textContent = JSON.stringify({ status: "success", duration: duration + "ms", result }, null, 2);
+                     responseDiv.style.display = "block";
+                 }
+             } catch (err) {
+                 showMethodError(hubIndex, methodIndex, err.toString());
+                 liveLogLine("error", `invoke:${methodName} failed`, err?.message || String(err), hubUrl);
+             } finally {
+                 if (executeButton && executeButton.dataset.streaming !== "true") {
+                     executeButton.disabled = false;
+                     executeButton.textContent = "Execute";
+                 }
+                 setHubUrlInput(hubUrl);
+                 refreshUIEnabledStates(hubUrl);
+             }
+         }
+
+         async function executeStreamingMethod(connection, methodName, args, responseDiv, hubUrl, executeButton) {
+             return new Promise((resolve, reject) => {
+                 const results = [];
+                 let subscription = null;
+
+                 const resetButton = () => {
+                     if (executeButton) {
+                         executeButton.textContent = "Execute";
+                         executeButton.dataset.streaming = "false";
+                         executeButton.disabled = false;
+                         executeButton.onclick = executeButton.originalOnClick;
+                     }
+                 };
+
+                 try {
+                     const stream = connection.stream(methodName, ...args);
+
+                     liveLogLine("event", `stream:${methodName}`, { args, type: 'started' }, hubUrl);
+
+                     subscription = stream.subscribe({
+                         next: (item) => {
+                             results.push(item);
+                             liveLogLine("event", `stream:${methodName}`, { type: 'data', item }, hubUrl);
+                             updateStreamingResponse(responseDiv, results, false);
+                         },
+                         complete: () => {
+                             liveLogLine("event", `stream:${methodName}`, { type: 'completed', totalItems: results.length }, hubUrl);
+                             updateStreamingResponse(responseDiv, results, true);
+                             resetButton();
+                             resolve(results);
+                         },
+                         error: (err) => {
+                             liveLogLine("error", `stream:${methodName}`, { type: 'error', error: err.message }, hubUrl);
+                             updateStreamingResponse(responseDiv, results, true, err);
+                             resetButton();
+                             reject(err);
+                         }
+                     });
+
+                     if (executeButton) {
+                         executeButton.textContent = "Stop Stream";
+                         executeButton.dataset.streaming = "true";
+                         executeButton.onclick = () => {
+                             try {
+                                 if (subscription) {
+                                     subscription.dispose();
+                                     subscription = null;
+                                 }
+                                 liveLogLine("event", `stream:${methodName}`, { type: 'cancelled', totalItems: results.length }, hubUrl);
+                                 updateStreamingResponse(responseDiv, results, true, { message: 'Stream cancelled by user' });
+                                 resetButton();
+                                 resolve(results);
+                             } catch (disposeErr) {
+                                 console.error('Error disposing stream:', disposeErr);
+                                 resetButton();
+                                 reject(disposeErr);
+                             }
+                         };
+                     }
+
+                 } catch (err) {
+                     resetButton();
+                     reject(err);
+                 }
+             });
+         }
+
+         function updateStreamingResponse(responseDiv, results, isComplete, error = null) {
+             const isCancelled = error && error.message === 'Stream cancelled by user';
+             const status = isCancelled ? "cancelled" :
+                 error ? "error" :
+                     (isComplete ? "completed" : "streaming");
+
+             const response = {
+                 status: status,
+                 itemCount: results.length,
+                 items: results,
+                 isComplete: isComplete || isCancelled
+             };
+
+             if (error && !isCancelled) {
+                 response.error = error.message || error.toString();
+             }
+
+             responseDiv.textContent = JSON.stringify(response, null, 2);
+             responseDiv.style.display = "block";
+
+             if (results.length > 10) {
+                 responseDiv.scrollTop = responseDiv.scrollHeight;
+             }
+         }
+
+         function showMethodError(hubIndex, methodIndex, error) {
+             const responseDiv = document.getElementById(`response-${hubIndex}-${methodIndex}`);
+             const responsesContainer = document.getElementById(`responses-${hubIndex}-${methodIndex}`);
+             if (!responseDiv || !responsesContainer) return;
+             responseDiv.textContent = JSON.stringify({ status: "error", error }, null, 2);
+             responseDiv.style.display = "block";
+             responsesContainer.classList.add("active");
+         }
+
+         function clearMethodResponse(hubIndex, methodIndex) {
+             const requestUrl = document.getElementById(`request-url-${hubIndex}-${methodIndex}`);
+             const curlCmd = document.getElementById(`curl-${hubIndex}-${methodIndex}`);
+             const responseDiv = document.getElementById(`response-${hubIndex}-${methodIndex}`);
+             const responsesContainer = document.getElementById(`responses-${hubIndex}-${methodIndex}`);
+             requestUrl.style.display = "none";
+             curlCmd.style.display = "none";
+             responseDiv.style.display = "none";
+             responsesContainer.classList.remove("active");
+         }
+
+         function safeStringify(obj, space = 0) {
+             try {
+                 return JSON.stringify(obj, null, space);
+             } catch {
+                 return String(obj);
+             }
+         }
+
+         function generateExampleFromSchema(schema, visitedTypes = new Set()) {
+             if (!schema) return null;
+
+             try {
+                 switch (schema.type) {
+                     case "string":
+                         if (schema.enum) {
+                             return schema.enum[0];
+                         }
+                         return "string";
+
+                     case "integer":
+                     case "number":
+                         return 0;
+
+                     case "boolean":
+                         return true;
+
+                     case "array":
+                         if (schema.items) {
+                             const itemExample = generateExampleFromSchema(schema.items, visitedTypes);
+                             return itemExample !== null ? [itemExample] : [];
+                         }
+                         return [];
+
+                     case "object":
+                         if (!schema.properties) return {};
+
+                         const schemaKey = JSON.stringify(schema.properties);
+                         if (visitedTypes.has(schemaKey)) {
+                             return {};
+                         }
+                         visitedTypes.add(schemaKey);
+
+                         const example = {};
+                         for (const [propName, propSchema] of Object.entries(schema.properties)) {
+                             const propExample = generateExampleFromSchema(propSchema, visitedTypes);
+                             if (propExample !== null) {
+                                 example[propName] = propExample;
+                             }
+                         }
+
+                         visitedTypes.delete(schemaKey);
+                         return example;
+
+                     default:
+                         return null;
+                 }
+             } catch (e) {
+                 console.warn("Error generating example:", e);
+                 return null;
+             }
+         }
+
+         function showError(message) {
+             const content = document.getElementById("content");
+             content.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+         }
+         function escapeHtml(text) {
+             const div = document.createElement("div");
+             div.textContent = text;
+             return div.innerHTML;
+         }
+
+         function toggleReturnSchema(hubIndex, methodIndex) {
+             const schemaDiv = document.getElementById(`return-schema-${hubIndex}-${methodIndex}`);
+             const button = event.target;
+
+             if (!schemaDiv) return;
+
+             if (schemaDiv.style.display === "none") {
+                 schemaDiv.style.display = "block";
+                 button.textContent = "Hide return schema";
+             } else {
+                 schemaDiv.style.display = "none";
+                 button.textContent = "Show return schema";
+             }
+         }
+
+         function escapeJs(s) {
+             return String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+         }
+    </script>
+</body>
+</html>
