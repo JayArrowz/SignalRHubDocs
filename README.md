@@ -6,6 +6,9 @@
 
 Auto-generated documentation and testing interface for ASP.NET Core SignalR hubs, similar to Swagger for Web APIs.
 
+<img width="3842" height="2218" alt="image" src="https://github.com/user-attachments/assets/f204a279-2484-4c6f-b489-3d2488346c3e" />
+
+
 ## Features
 
 - **Automatic Hub Discovery**: Scans your application for SignalR hubs and generates comprehensive documentation
