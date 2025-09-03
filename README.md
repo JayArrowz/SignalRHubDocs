@@ -1,5 +1,9 @@
 # SignalRHubDocs
 
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![NuGet](https://img.shields.io/nuget/v/SignalRHubDocs.svg)](https://www.nuget.org/packages/SignalRHubDocs)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg)](https://buymeacoffee.com/jayarrowz)
+
 Auto-generated documentation and testing interface for ASP.NET Core SignalR hubs, similar to Swagger for Web APIs.
 
 ## Features
@@ -281,6 +285,12 @@ The testing interface supports modern browsers with WebSocket capability. The ge
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## ☕ Support
+
+If you find CompactPack useful and want to support its development:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg)](https://buymeacoffee.com/jayarrowz)
 
 ## License
 
