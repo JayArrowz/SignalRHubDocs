@@ -288,7 +288,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## ☕ Support
 
-If you find CompactPack useful and want to support its development:
+If you find SignalRHubDocs useful and want to support its development:
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow.svg)](https://buymeacoffee.com/jayarrowz)
 
