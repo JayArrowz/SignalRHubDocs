@@ -99,7 +99,7 @@ public class HubInspectorService
         });
     }
 
-    private HubMethodInfo InspectMethod(MethodInfo method, bool sendEnumByString)
+    public HubMethodInfo InspectMethod(MethodInfo method, bool sendEnumByString)
     {
         var docAttr = method.GetCustomAttribute<HubMethodDocumentationAttribute>();
         var authorizeAttr = method.GetCustomAttribute<AuthorizeAttribute>();
@@ -398,10 +398,12 @@ public class HubInspectorService
             if (genericDef == typeof(Task<>))
             {
                 return $"{GetFriendlyTypeName(type.GetGenericArguments()[0])}";
-            } else if (genericDef == typeof(IEnumerable<>) || genericDef == typeof(List<>))
+            }
+            else if (genericDef == typeof(IEnumerable<>) || genericDef == typeof(List<>))
             {
                 return $"{GetFriendlyTypeName(type.GetGenericArguments()[0])}[]";
-            } else if(genericDef == typeof(IAsyncEnumerable<>))
+            }
+            else if (genericDef == typeof(IAsyncEnumerable<>))
             {
                 return $"{GetFriendlyTypeName(type.GetGenericArguments()[0])}";
             }
